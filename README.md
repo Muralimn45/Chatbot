@@ -32,3 +32,5 @@ A Seamless Web Experience
 From the user's perspective, the experience is smooth and intuitive. The web page provides an instant messaging-like interface. A loading indicator or a simple "..." message shows that the chatbot is "thinking" while the API call is in progress. The response from the Gemini API, which is typically in plain text, is then rendered in the chat window, completing the conversational loop.
 
 This architecture showcases a modern approach to building intelligent applications. It separates the presentation layer (the web page) from the intelligence layer (the Gemini API), making the system highly scalable and flexible. You can easily update the user interface or add new features without affecting the core conversational logic. This project not only demonstrates an understanding of NLP and API integration but also highlights the ability to build a complete, real-world application
+
+#OUTPUT:<img width="768" height="726" alt="Image" src="https://github.com/user-attachments/assets/62323ef6-2ad1-4014-93a5-3658857fc772" />
