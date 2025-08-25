@@ -33,4 +33,5 @@ From the user's perspective, the experience is smooth and intuitive. The web pag
 
 This architecture showcases a modern approach to building intelligent applications. It separates the presentation layer (the web page) from the intelligence layer (the Gemini API), making the system highly scalable and flexible. You can easily update the user interface or add new features without affecting the core conversational logic. This project not only demonstrates an understanding of NLP and API integration but also highlights the ability to build a complete, real-world application
 
-#OUTPUT:<img width="768" height="726" alt="Image" src="https://github.com/user-attachments/assets/62323ef6-2ad1-4014-93a5-3658857fc772" />
+#OUTPUT:
+<img width="1905" height="867" alt="Image" src="https://github.com/user-attachments/assets/17cebd7a-5f89-4da2-97f6-fe3589292d0f" />
