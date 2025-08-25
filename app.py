@@ -141,21 +141,123 @@ def index():
         <script src="https://cdn.tailwindcss.com"></script>
         <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
         <style>
-            body { font-family: 'Inter', sans-serif; }
-            .dark { background-color: #1a202c; color: #e2e8f0; }
-            #chat-box { scroll-behavior: smooth; }
-            /* Styling for markdown elements to make them look good */
-            #chat-box p { margin-bottom: 0.5rem; }
-            #chat-box ul, #chat-box ol { margin-left: 1.5rem; list-style-type: disc; }
-            #chat-box li { margin-bottom: 0.25rem; }
-            #chat-box strong { font-weight: bold; }
+            @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+            body { 
+                font-family: 'Poppins', sans-serif;
+                background-image: linear-gradient(to right top, #d16ba5, #c777b9, #ba83ca, #aa8fd8, #9a9ae1, #79b3f4, #69bff8, #52cffe, #41dfff, #46eefa, #5ffbf1);
+                animation: gradient-animation 10s ease infinite;
+                background-size: 200% 200%;
+            }
+            .dark { 
+                background-image: linear-gradient(to right top, #2d0e2e, #291232, #251535, #221838, #1e1b3b);
+            }
+            @keyframes gradient-animation {
+                0% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
+                100% { background-position: 0% 50%; }
+            }
+            #chat-box { 
+                scroll-behavior: smooth;
+                transition: background-color 0.3s ease;
+            }
+            .chat-container {
+                backdrop-filter: blur(10px);
+                background-color: rgba(255, 255, 255, 0.2);
+                border-radius: 20px;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .dark .chat-container {
+                background-color: rgba(0, 0, 0, 0.2);
+                border: 1px solid rgba(0, 0, 0, 0.3);
+            }
+            .user-message {
+                background-color: #4f46e5;
+                color: white;
+                border-radius: 20px;
+                border-bottom-right-radius: 2px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                overflow-wrap: break-word;
+                word-break: break-all;
+                max-width: 85%;
+            }
+            .bot-message {
+                background-color: #e5e7eb;
+                color: #1f2937;
+                border-radius: 20px;
+                border-bottom-left-radius: 2px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                overflow-wrap: break-word;
+                word-break: break-all;
+                max-width: 85%;
+            }
+            .dark .bot-message {
+                background-color: #374151;
+                color: #e5e7eb;
+            }
+            .input-group {
+                background-color: rgba(255, 255, 255, 0.5);
+                backdrop-filter: blur(10px);
+            }
+            .dark .input-group {
+                background-color: rgba(0, 0, 0, 0.5);
+            }
+            input:focus {
+                outline: none;
+                box-shadow: 0 0 0 2px #4f46e5;
+            }
+            .microphone-button {
+                transition: transform 0.2s ease-in-out;
+            }
+            .microphone-button:hover {
+                transform: scale(1.1);
+            }
+            .microphone-button.pulse-animation {
+                animation: pulse 1.5s infinite;
+            }
+            @keyframes pulse {
+                0%, 100% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7);
+                }
+                70% {
+                    transform: scale(1.05);
+                    box-shadow: 0 0 0 10px rgba(79, 70, 229, 0);
+                }
+            }
+
+            @media (min-width: 640px) {
+                body {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .chat-container {
+                    width: 100%;
+                    max-width: 4xl;
+                    height: 90vh;
+                }
+            }
+            @media (max-width: 639px) {
+                body {
+                    padding: 0;
+                    margin: 0;
+                    height: 100vh;
+                    display: flex;
+                    flex-direction: column;
+                }
+                .chat-container {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 0;
+                }
+            }
         </style>
     </head>
-    <body class="bg-gray-100 flex items-center justify-center h-screen">
-        <div class="flex flex-col w-full max-w-xl h-4/5 bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden p-4">
-            <!-- Chat Header -->
+    <body class="flex items-center justify-center h-screen p-4">
+        <div class="flex flex-col w-full chat-container overflow-hidden p-4">
             <div class="flex justify-between items-center mb-6">
-                <h1 class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">Gemini Chatbot</h1>
+                <h1 class="text-3xl font-bold text-indigo-700 dark:text-indigo-400">Gemini Chatbot</h1>
                 <button
                     id="theme-toggle"
                     class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200"
@@ -170,21 +272,23 @@ def index():
                 </button>
             </div>
 
-            <!-- Chat Messages Area -->
-            <div id="chat-box" class="flex-1 p-4 overflow-y-auto space-y-4 bg-white dark:bg-gray-800 rounded-2xl shadow-lg mb-4">
-                <!-- Welcome Message -->
+            <div id="chat-box" class="flex-1 p-4 overflow-y-auto space-y-4 rounded-xl mb-4">
                 <div class="flex justify-start">
-                    <div class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-3 rounded-2xl max-w-xs rounded-bl-none shadow-md">
+                    <div class="bot-message p-3 max-w-xs rounded-bl-none shadow-md">
                         Hello! I am a chatbot powered by Google's Gemini. How can I help you today?
                     </div>
                 </div>
             </div>
 
-            <!-- Chat Input Form -->
-            <div class="p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
-                <form id="chat-form" class="flex">
-                    <input type="text" id="user-input" class="flex-1 p-3 rounded-l-2xl border-none focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-100 transition-all duration-200" placeholder="Type a message...">
-                    <button type="submit" class="p-3 bg-indigo-600 text-white rounded-r-2xl font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200">
+            <div class="p-4 rounded-xl shadow-lg input-group">
+                <form id="chat-form" class="flex items-center space-x-2">
+                    <input type="text" id="user-input" class="flex-1 p-3 rounded-xl border-none focus:outline-none dark:bg-gray-700 dark:text-gray-100 transition-all duration-200" placeholder="Type a message...">
+                    <button type="button" id="record-button" class="p-3 bg-indigo-600 text-white rounded-full font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 14c1.657 0 3-1.343 3-3V5c0-1.657-1.343-3-3-3S9 3.343 9 5v6c0 1.657 1.343 3 3 3zm5.5-3c0 3.53-2.64 6.44-6 6.93V21h-1v-4.07c-3.36-.49-6-3.4-6-6.93h-2c0 4.38 3.52 7.91 8 8.4V21h4v-4.07c4.48-.49 8-4.02 8-8.4h-2z"/>
+                        </svg>
+                    </button>
+                    <button type="submit" class="p-3 bg-indigo-600 text-white rounded-full font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
                         </svg>
@@ -201,8 +305,92 @@ def index():
                 const themeToggle = document.getElementById('theme-toggle');
                 const sunIcon = document.getElementById('sun-icon');
                 const moonIcon = document.getElementById('moon-icon');
+                const recordButton = document.getElementById('record-button');
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                let recognition = null;
+                let isListening = false;
+                let isVoiceInput = false;
 
-                // Check for system dark mode preference on page load
+                // Web Speech API for Text-to-Speech
+                const synthesis = window.speechSynthesis;
+                function speakBotResponse(text) {
+                    if (synthesis.speaking) {
+                        synthesis.cancel();
+                    }
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.rate = 1.0;
+                    utterance.pitch = 1.0;
+                    synthesis.speak(utterance);
+                }
+
+                // Initial UI state for microphone
+                if (!SpeechRecognition) {
+                    recordButton.style.display = 'none';
+                    userInput.placeholder = 'Speech recognition not supported.';
+                }
+
+                recordButton.addEventListener('click', async () => {
+                    if (isListening) {
+                        if (recognition) {
+                            recognition.stop();
+                        }
+                        return;
+                    }
+
+                    // Stop any ongoing speech as soon as the user starts a new voice command
+                    if (synthesis.speaking) {
+                        synthesis.cancel();
+                    }
+
+                    // Check for and request microphone permission on click
+                    try {
+                        await navigator.mediaDevices.getUserMedia({ audio: true });
+                        console.log("Microphone permission granted.");
+
+                        if (!recognition) {
+                            recognition = new SpeechRecognition();
+                            recognition.continuous = false;
+                            recognition.lang = 'en-US';
+                            recognition.interimResults = false;
+                            recognition.maxAlternatives = 1;
+
+                            recognition.onresult = (event) => {
+                                const transcript = event.results[0][0].transcript;
+                                userInput.value = transcript;
+                                isVoiceInput = true; // Set a global flag for voice input
+                                isListening = false;
+                                recordButton.classList.remove('pulse-animation');
+                                chatForm.dispatchEvent(new Event('submit', { cancelable: true }));
+                            };
+
+                            recognition.onend = () => {
+                                isListening = false;
+                                recordButton.classList.remove('pulse-animation');
+                                userInput.placeholder = "Type a message...";
+                            };
+
+                            recognition.onerror = (event) => {
+                                console.error('Speech recognition error:', event.error);
+                                isListening = false;
+                                recordButton.classList.remove('pulse-animation');
+                                userInput.placeholder = "Type a message...";
+                                speakBotResponse("Sorry, I didn't catch that. Please try again.");
+                            };
+                        }
+
+                        isListening = true;
+                        recognition.start();
+                        recordButton.classList.add('pulse-animation');
+                        userInput.placeholder = "Listening...";
+
+                    } catch (err) {
+                        console.error("Microphone permission denied:", err);
+                        userInput.placeholder = "Microphone access denied. Please type.";
+                        speakBotResponse("Microphone access was denied. Please allow it to use voice input.");
+                    }
+                });
+
+                // Theme toggle logic
                 if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
                     document.documentElement.classList.add('dark');
                     sunIcon.classList.remove('hidden');
@@ -213,7 +401,6 @@ def index():
                     moonIcon.classList.remove('hidden');
                 }
 
-                // Add event listener for theme toggle button
                 themeToggle.addEventListener('click', () => {
                     document.documentElement.classList.toggle('dark');
                     sunIcon.classList.toggle('hidden');
@@ -223,34 +410,32 @@ def index():
                 chatForm.addEventListener('submit', async function(event) {
                     event.preventDefault();
                     const userMessage = userInput.value.trim();
+                    if (userMessage === '') return;
 
-                    if (userMessage === '') {
-                        return;
+                    // Stop any ongoing voice listening
+                    if (isListening && recognition) {
+                        recognition.stop();
+                        isListening = false;
                     }
+
+                    // Capture the state of the voice flag locally before any async operations
+                    const shouldSpeak = isVoiceInput;
+                    isVoiceInput = false; // Reset the global flag for the next turn
 
                     // Append user message to chat box
                     const userMsgDiv = document.createElement('div');
                     userMsgDiv.className = 'flex justify-end';
-                    userMsgDiv.innerHTML = `<div class="p-3 rounded-2xl max-w-xs md:max-w-md lg:max-w-lg shadow-md bg-indigo-500 text-white rounded-br-none">${userMessage}</div>`;
+                    userMsgDiv.innerHTML = `<div class="user-message p-3 rounded-br-none shadow-md">${userMessage}</div>`;
                     chatBox.appendChild(userMsgDiv);
-
-                    // Clear input field
                     userInput.value = '';
 
                     // Simulate bot typing
                     const botTypingDiv = document.createElement('div');
                     botTypingDiv.className = 'flex justify-start';
-                    botTypingDiv.innerHTML = `
-                        <div class="p-3 rounded-2xl max-w-xs md:max-w-md lg:max-w-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-bl-none shadow-md">
-                            <div class="flex items-center">
-                                <span class="animate-pulse">...</span>
-                            </div>
-                        </div>
-                    `;
+                    botTypingDiv.innerHTML = `<div class="bot-message p-3 rounded-bl-none shadow-md"><div class="flex items-center"><span class="animate-pulse">...</span></div></div>`;
                     chatBox.appendChild(botTypingDiv);
                     chatBox.scrollTop = chatBox.scrollHeight;
 
-                    // Send message to Flask backend
                     try {
                         const response = await fetch('/chat', {
                             method: 'POST',
@@ -261,19 +446,17 @@ def index():
                         });
 
                         const data = await response.json();
-
-                        // Parse the markdown from the response and display it as HTML
                         const htmlResponse = marked.parse(data.response);
+
+                        // Speak the bot's response only if the local flag was true
+                        if (shouldSpeak) {
+                            speakBotResponse(data.response);
+                        }
 
                         // Replace typing indicator with bot's response
                         const botResponseContainer = document.createElement('div');
                         botResponseContainer.className = 'flex justify-start';
-                        botResponseContainer.innerHTML = `
-                            <div class="p-3 rounded-2xl max-w-xs md:max-w-md lg:max-w-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-bl-none shadow-md">
-                                ${htmlResponse}
-                            </div>
-                        `;
-
+                        botResponseContainer.innerHTML = `<div class="bot-message p-3 rounded-bl-none shadow-md">${htmlResponse}</div>`;
                         botTypingDiv.replaceWith(botResponseContainer);
                         chatBox.scrollTop = chatBox.scrollHeight;
 
@@ -281,9 +464,10 @@ def index():
                         console.error('Error:', error);
                         const errorMsgDiv = document.createElement('div');
                         errorMsgDiv.className = 'flex justify-start';
-                        errorMsgDiv.innerHTML = `<div class="p-3 rounded-2xl max-w-xs md:max-w-md lg:max-w-lg bg-red-200 text-red-800 rounded-bl-none shadow-md">An error occurred.</div>`;
+                        errorMsgDiv.innerHTML = `<div class="bot-message p-3 bg-red-200 text-red-800 rounded-bl-none shadow-md">An error occurred.</div>`;
                         botTypingDiv.replaceWith(errorMsgDiv);
                         chatBox.scrollTop = chatBox.scrollHeight;
+                        speakBotResponse("An error occurred. Please try again.");
                     }
                 });
             });
@@ -302,5 +486,4 @@ def chat():
 
 
 if __name__ == '__main__':
-    # Flask application run function, specifying host and port
     app.run(debug=True, host='0.0.0.0', port=5000)
